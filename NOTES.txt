@@ -1,0 +1,11 @@
+Dalszy rozwój aplikacji
+
+Każde uruchomienie sprawdza, czy istnieje już wcześniej zapisany model i jeśli tak,
+to odbywa się douczanie, czyli kontynuacja nauki, aż do
+    a) okreslonego kryterum stopu,
+    b) osiągnięcia maksymalnej liczby epok na sesję.
+
+Każde pokolenie ma się kończyć:
+    a) zapisaniem wyuczonego modelu, np. 'model.bin'
+    b) dopisaniem raportu o ocenie modelu, np. 'model.txt'
+

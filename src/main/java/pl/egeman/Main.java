@@ -45,7 +45,8 @@ public class Main {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public Main run(){
+    // Starting or continuing training.
+    public Main fit(){
         File samplesDir = new File(params.samplesDirPathName);
         File[] samplesList = samplesDir.listFiles();
         int samplesCount = 0;
@@ -65,10 +66,7 @@ public class Main {
         }
 
         try {
-            // TODO: zapisywanie modelu na dysku w każdej epoce
             // TODO: odczytywanie wyuczonego modelu z dysku i opcjonalnie dotrenowywanie, kontynuacja treningu
-            // TODO: losowy podział na trzy zestawy próbek: uczące, sprawdzające i weryfikacyjne(?)
-            // TODO: użycie próbek weryfikacyjnych w celu przerwania treningu(?)
             // TOREAD: https://deeplearning4j.konduit.ai/v/en-1.0.0-beta6/models/recurrent
 
             int miniBatchSize = 1;
@@ -97,6 +95,9 @@ public class Main {
             log.info(String.valueOf(testData.next()));
             testData.reset();
 
+            // Konfiguracja modelu
+            // MSE -> Mean Squared Error, średni kwadrat błędu -> http://localhost:63342/inna/nd4j-api-1.0.0-M2.1-javadoc.jar/org/nd4j/linalg/lossfunctions/impl/LossMSE.html
+            // IDENTITY -> f(x) = x -> https://javadoc.io/doc/org.nd4j/nd4j-api/latest/org/nd4j/linalg/activations/impl/ActivationIdentity.html
             int hiddenLayerWidth = 30;
             MultiLayerConfiguration configuration = new NeuralNetConfiguration.Builder()
                     .seed(12345)    //Random number generator seed for improved repeatability. Optional.
@@ -106,7 +107,6 @@ public class Main {
                     // .gradientNormalizationThreshold(0.5)
                     .list()
                     .layer(new LSTM.Builder().activation(Activation.TANH).nIn(4).nOut(hiddenLayerWidth).build())
-                    // MSE - Mean Squared Error, średni kwadrat błędu, http://localhost:63342/inna/nd4j-api-1.0.0-M2.1-javadoc.jar/org/nd4j/linalg/lossfunctions/impl/LossMSE.html
                     .layer(new RnnOutputLayer.Builder(LossFunctions.LossFunction.MSE).activation(Activation.IDENTITY).nIn(hiddenLayerWidth).nOut(1).build())
                     .build();
 
@@ -116,8 +116,7 @@ public class Main {
             model.init();
 
             // Nasłuchiwanie — każda próbka w zestawie treningowym to jest jedna iteracja.
-            // model.setListeners(new ScoreIterationListener(1), new EvaluativeListener(testData, 1, InvocationType.EPOCH_END));
-            model.setListeners(new ScoreIterationListener(50));
+            model.setListeners(new ScoreIterationListener(10));
 
             // Trenowanie — cały zestaw danych treningowych to jest jedna epoka.
             int nEpochs = 1;
@@ -125,18 +124,23 @@ public class Main {
                 log.info("Training epoch {}.", i);
                 model.fit(trainData);
 
-                // log.info("Evaluating epoch {}.", i);
-                // RegressionEvaluation eval = model.evaluateRegression(testData);
-                // eval.eval(ds.getLabels(), output);
-                // log.info(eval.stats());
+                // Ocena
+                // https://deeplearning4j.konduit.ai/deeplearning4j/how-to-guides/tuning-and-training/evaluation#evaluation-for-regression
+                // Columns are Mean Squared Error, Mean Absolute Error, Root Mean Squared Error, Relative Squared Error, and R^2 Coefficient of Determination
+                log.info("Evaluating epoch {}.", i);
+                RegressionEvaluation eval = model.evaluateRegression(testData);
+                log.info(eval.stats());
 
+                /**
                 DataSet ds = testData.next();
                 INDArray output = model.output(ds.getFeatures(), false);
                 log.info("Test data features:\n{}", ds.getFeatures());
                 log.info("Model output:\n{}", output);
                 log.info("Test data labels:\n{}.", ds.getLabels());
                 testData.reset();
+                **/
             }
+            log.info("Saving model to {}.", params.modelFileName);
             model.save(new File(params.modelFileName));
         } catch (IOException | InterruptedException e) {
             System.out.println(e.getLocalizedMessage());
