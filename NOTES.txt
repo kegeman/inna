@@ -2,10 +2,20 @@ Dalszy rozwój aplikacji
 
 Każde uruchomienie sprawdza, czy istnieje już wcześniej zapisany model i jeśli tak,
 to odbywa się douczanie, czyli kontynuacja nauki, aż do
-    a) okreslonego kryterum stopu,
+    a) okreslonego kryterum stopu (https://deeplearning4j.konduit.ai/deeplearning4j/how-to-guides/tuning-and-training/early-stopping),
     b) osiągnięcia maksymalnej liczby epok na sesję.
 
 Każde pokolenie ma się kończyć:
-    a) zapisaniem wyuczonego modelu, np. 'model.bin'
-    b) dopisaniem raportu o ocenie modelu, np. 'model.txt'
+    a) zapisaniem wyuczonego modelu, np. 'model.bin', pod warunkiem że bieżący model jest lepszy od zapisanego poprzednio
+    b) zapisaniem oceny modelu, np. 'model.txt'
+
+--------------------------
+Odczyt pojedynczej odpowiedzi modelu.
+
+//                DataSet ds = testData.next();
+//                INDArray output = model.output(ds.getFeatures(), false);
+//                log.info("Test data features:\n{}", ds.getFeatures());
+//                log.info("Model output:\n{}", output);
+//                log.info("Test data labels:\n{}.", ds.getLabels());
+//                testData.reset();
 

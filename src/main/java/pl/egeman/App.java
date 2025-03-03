@@ -9,6 +9,7 @@ public class App
         params.samplesDirPathName = "/home/charlie/projects/neural/data/samples"; // flat neural network input files
         params.labelsDirPathName = "/home/charlie/projects/neural/data/labels"; // flat neural network labels files
         params.modelFileName = "/home/charlie/projects/neural/data/model.bin";
+        params.evalFileName = "/home/charlie/projects/neural/data/model.txt";
         params.minSamplesCount = 500;
         // TODO: params.initialize(args);
 
